@@ -14,23 +14,40 @@ function freq_to_color(f) {
 function generate_freqs(n, fn) {
     freqs = [];
     for (var i = 1; i<=n; i++) {
-        freqs.push([i,fn(i)]); 
+        var pair = fn(i);
+        if (pair != null) { 
+            freqs.push(pair); 
+        }
     }
     return freqs;
 }
 
 function sawtooth(n) {
     return generate_freqs(n, function(n) {
-        return -2/(Math.PI*n)*Math.pow(-1,n)
+        return [n, -2/(Math.PI*n)*Math.pow(-1,n)];
+    });
+}
+
+function square(n) {
+    return generate_freqs(n, function(n) {
+        if (n == 0) return null;
+        return [1+2*(n-1), 1/(1+2*(n-1))];
     });
 }
 
 function render_sine(f,a) {
-    console.log('rendering' + f + ' ' + a);
     ctx.strokeStyle = freq_to_color(f);
+    //don't bother rendering unnoticable
+    if (a*zoom*canvas.height < 15) {
+        ctx.beginPath();
+        ctx.moveTo(0,canvas.height/2);
+        ctx.lineTo(canvas.width, canvas.height/2);
+        ctx.stroke();
+        return;
+    }
+
     ctx.beginPath();
     ctx.moveTo(0,ctx.height/2);
-    console.log(ctx.strokeStyle);
     for (var x = 0; x<canvas.width; x++) {
         var y = canvas.height/2;
         y -= zoom*canvas.height * a * Math.sin(scale*f*x/canvas.width)/4;
@@ -97,7 +114,7 @@ function setup() {
     var button2 = document.querySelector('#reeval');
     button2.addEventListener('click', function() {
         var count = document.querySelector('#count').value;
-        freqs = sawtooth(count);
+        freqs = square(count);
         render(freqs);
     });
 }
