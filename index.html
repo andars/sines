@@ -3,17 +3,17 @@
   </head>
   <body>
     <canvas id='canvas1' width='1000' height='500'></canvas>
+    <br/>
+    <input id='slider' type='range' min='0' max='3' step='0.01'/>
+    <br/>
 
-    <br/>
-    <input id='slider' type='range' min='0' max='1' step='0.01'/>
-    <br/>
-    <input id='freq' type='number' value='1.0'/>
-    <input id='amp_value' type='number' value='1.0'/>
+    <input id='freq' type='number' value='1.0' step='0.5'/>
+    <input id='amp_value' type='number' value='1.0' step='0.05'/>
     <input id='amp' type='range' min='0' max='2' step='0.01'/>
     <input id='add_button' type='button' value='add'/>
-
     <br/>
-    <input id='count' type='number' value='5'/>
+
+    <input id='count' type='number' value='0'/>
     <input id='reeval' type='button' value='re-eval'/>
     <script src='main.js'></script>
   </body>

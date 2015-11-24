@@ -3,11 +3,17 @@ var canvas = document.querySelector('#canvas1');
 var ctx = canvas.getContext('2d');
 
 var gw = 4*Math.PI/500;
-var freqs = [[1,1]];
+var scale = gw*canvas.width;
+var zoom = 1;
+var freqs = [];
+
+function freq_to_color(f) {
+    return 'rgba(' + Math.floor(f/10 * 255) + ',0,'+Math.floor((1-f/10)*255) + ',0.2)';
+}
 
 function generate_freqs(n, fn) {
     freqs = [];
-    for (var i = 1; i<n; i++) {
+    for (var i = 1; i<=n; i++) {
         freqs.push([i,fn(i)]); 
     }
     return freqs;
@@ -19,43 +25,47 @@ function sawtooth(n) {
     });
 }
 
-function generate_graph(freqs) {
-    var points = [];
-    var scale = gw*canvas.width;
+function render_sine(f,a) {
+    console.log('rendering' + f + ' ' + a);
+    ctx.strokeStyle = freq_to_color(f);
+    ctx.beginPath();
+    ctx.moveTo(0,ctx.height/2);
+    console.log(ctx.strokeStyle);
+    for (var x = 0; x<canvas.width; x++) {
+        var y = canvas.height/2;
+        y -= zoom*canvas.height * a * Math.sin(scale*f*x/canvas.width)/4;
+        ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+}
+
+function render(freqs) {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    //individual components
+    for (var i in freqs) {
+        render_sine(freqs[i][0], freqs[i][1]);
+    }
+
+    var color = 'rgb(20,200,0)';//'rgb(' + a*255 + ',' + 0 + ',' + (1-a)*255 + ')';
+
+    //total signal
+    ctx.strokeStyle = color; 
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height/2);
     for (var x = 0; x<canvas.width; x++) {
         var y = canvas.height/2;
         for (var i in freqs) {
-            y -= canvas.height * Math.sin(scale*freqs[i][0]*x/canvas.width)/4 * freqs[i][1];
+            y -= zoom*canvas.height * Math.sin(scale*freqs[i][0]*x/canvas.width)/4 * freqs[i][1];
         }
-        points.push({
-            x: x,
-            y: y
-        });
-    }
-
-    console.log(points);
-    var color = 'rgb(200,0,200)';//'rgb(' + a*255 + ',' + 0 + ',' + (1-a)*255 + ')';
-    return {points: points, color: color}; 
-}
-
-
-function render(path) {
-    var points = path.points;
-    var color = path.color;
-
-    ctx.strokeStyle = color; 
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.moveTo(0, canvas.height/2);
-    ctx.beginPath();
-    for (var i in points) {
-        ctx.lineTo(points[i].x, points[i].y);
+        ctx.lineTo(x, y);
     }
     ctx.stroke();
 }
 
 function input_handler() {
-    var a = this.value; 
-    render(generate_graph(freqs));
+    zoom = this.value;
+    render(freqs);
 }
 
 function add_freq() {
@@ -63,7 +73,7 @@ function add_freq() {
     var amp = document.querySelector('#amp').value;
 
     freqs.push([freq,amp]);
-    render(generate_graph(freqs));
+    render(freqs);
 }
 
 
@@ -88,10 +98,10 @@ function setup() {
     button2.addEventListener('click', function() {
         var count = document.querySelector('#count').value;
         freqs = sawtooth(count);
-        render(generate_graph(freqs));
+        render(freqs);
     });
 }
 
 setup();
-render(generate_graph(freqs));
+render(freqs);
 
